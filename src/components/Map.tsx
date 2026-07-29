@@ -8,7 +8,7 @@ import L from "leaflet";
 import { ZoomIn, ZoomOut, Compass, Navigation } from "lucide-react";
 import { Region } from "../types";
 import { WORLD_COUNTRIES } from "../data/worldCountries";
-import { ALL_REGIONS, JAPAN_LIST, USA_LIST, CHINA_LIST } from "../data/regions";
+import { ALL_REGIONS, JAPAN_LIST, USA_LIST, CHINA_LIST, VIETNAM_LIST } from "../data/regions";
 import { PlayerState } from "../lib/multiplayer";
 import { VehicleType, getMapVehicleMarkerHtml } from "../utils/vehicleAvatars";
 
@@ -77,6 +77,7 @@ const MapComponent: React.FC<MapProps> = ({
     const isChinaMode = effectiveLevel === "china";
     const isJapanMode = effectiveLevel === "japan";
     const isUsaMode = effectiveLevel === "usa";
+    const isVietnamMode = effectiveLevel === "vietnam";
 
     const hasValidActiveCoords =
       activeRegion &&
@@ -95,8 +96,10 @@ const MapComponent: React.FC<MapProps> = ({
       ? [36.2, 138.2]
       : isUsaMode
       ? [37.0, -95.7]
+      : isVietnamMode
+      ? [15.8, 107.5]
       : [36.2, 127.8];
-    const initialZoom = isWorldMode ? 3 : isChinaMode ? 4 : isUsaMode ? 4 : isJapanMode ? 6 : 8;
+    const initialZoom = isWorldMode ? 3 : isChinaMode ? 4 : isUsaMode ? 4 : isVietnamMode ? 5 : isJapanMode ? 6 : 8;
 
     try {
       // Create leaflet map instance
@@ -212,7 +215,8 @@ const MapComponent: React.FC<MapProps> = ({
         const isChina = activeRegion.level === "china";
         const isUsa = activeRegion.level === "usa";
         const isJapan = activeRegion.level === "japan";
-        const targetZoom = isWorld ? 3 : isChina ? 5 : isUsa ? 5 : isJapan ? 6 : 8;
+        const isVietnam = activeRegion.level === "vietnam";
+        const targetZoom = isWorld ? 3 : isChina ? 5 : isUsa ? 5 : isVietnam ? 5 : isJapan ? 6 : 8;
 
         const currentZoom = mapRef.current.getZoom();
         if (Math.abs(currentZoom - targetZoom) <= 1) {
@@ -271,7 +275,26 @@ const MapComponent: React.FC<MapProps> = ({
     const isJapanMode = currentLevel === "japan";
     const isUsaMode = currentLevel === "usa";
     const isChinaMode = currentLevel === "china";
+    const isVietnamMode = currentLevel === "vietnam";
     const isWorldMode = currentLevel === "world";
+
+    if (isVietnamMode) {
+      const pool = VIETNAM_LIST;
+      const pId = String(props.id || props.ID || feature.id || "").toLowerCase().trim();
+      const pNam = String(props.name || props.NAME || props.NAME_LONG || props.nam || props.name_kr || "").toLowerCase().trim();
+
+      if (pId) {
+        const foundById = pool.find((r) => r.id.toLowerCase() === pId);
+        if (foundById) return foundById;
+      }
+
+      const found = pool.find((r) => {
+        const en = r.name_en.toLowerCase().trim();
+        const kr = r.name_kr.toLowerCase().trim();
+        return pNam && (pNam === en || pNam === kr || pNam.includes(en) || en.includes(pNam) || pNam.includes(kr));
+      });
+      if (found) return found;
+    }
 
     if (isJapanMode) {
       const pool = JAPAN_LIST;
@@ -518,6 +541,7 @@ const MapComponent: React.FC<MapProps> = ({
     const isJapanMode = currentLevel === "japan";
     const isUsaMode = currentLevel === "usa";
     const isChinaMode = currentLevel === "china";
+    const isVietnamMode = currentLevel === "vietnam";
     const isWorldMode = currentLevel === "world";
 
     if (isActive) {
@@ -529,6 +553,9 @@ const MapComponent: React.FC<MapProps> = ({
       }
       if (isChinaMode) {
         return { fillColor: "#f59e0b", fillOpacity: 0.98, color: "#78350f", weight: 3 };
+      }
+      if (isVietnamMode) {
+        return { fillColor: "#dc2626", fillOpacity: 0.98, color: "#facc15", weight: 3 };
       }
       return isWorldMode
         ? {
@@ -553,6 +580,9 @@ const MapComponent: React.FC<MapProps> = ({
       if (isChinaMode) {
         return { fillColor: "#eab308", fillOpacity: 0.95, color: "#854d0e", weight: 2.5 };
       }
+      if (isVietnamMode) {
+        return { fillColor: "#ef4444", fillOpacity: 0.85, color: "#991b1b", weight: 2 };
+      }
       return isWorldMode
         ? {
             fillColor: "#475569",
@@ -568,7 +598,7 @@ const MapComponent: React.FC<MapProps> = ({
           };
     } else {
       return {
-        fillColor: isWorldMode || isJapanMode || isUsaMode || isChinaMode ? "#f8fafc" : "#ffffff",
+        fillColor: isWorldMode || isJapanMode || isUsaMode || isChinaMode || isVietnamMode ? "#f8fafc" : "#ffffff",
         fillOpacity: 0.45,
         color: "#cbd5e1",
         weight: 1,
@@ -612,6 +642,8 @@ const MapComponent: React.FC<MapProps> = ({
           ? "/geojson/us-states.json"
           : currentLevel === "china"
           ? "/geojson/china-provinces.json"
+          : currentLevel === "vietnam"
+          ? "/geojson/vietnam-provinces.json"
           : "/geojson/world.json";
 
       fetch(jsonUrl)
@@ -716,6 +748,7 @@ const MapComponent: React.FC<MapProps> = ({
     const isJapanMode = currentLevel === "japan";
     const isUsaMode = currentLevel === "usa";
     const isChinaMode = currentLevel === "china";
+    const isVietnamMode = currentLevel === "vietnam";
     const isWorldMode = currentLevel === "world";
 
     // -- B. Draw Rail Track Lines --
@@ -727,14 +760,14 @@ const MapComponent: React.FC<MapProps> = ({
       .map((r) => [r.lat, r.lng]);
 
     if (visitedCoords.length > 1) {
-      // Single clean thin line: Green for Korea, Gray/Slate for World, Yellow for China
-      const polylineColor = isJapanMode ? "#e11d48" : isUsaMode ? "#2563eb" : isChinaMode ? "#d97706" : isWorldMode ? "#64748b" : "#10b981";
+      // Single clean thin line: Green for Korea, Red/Yellow for Vietnam, Gray/Slate for World, Yellow for China
+      const polylineColor = isJapanMode ? "#e11d48" : isUsaMode ? "#2563eb" : isChinaMode ? "#d97706" : isVietnamMode ? "#facc15" : isWorldMode ? "#64748b" : "#10b981";
       L.polyline(visitedCoords, {
         color: polylineColor,
-        weight: 2.5,
+        weight: isVietnamMode ? 3.5 : 2.5,
         lineCap: "round",
         lineJoin: "round",
-        opacity: 0.85,
+        opacity: 0.9,
       }).addTo(polylinesGroup);
 
       // Add to drawn set to avoid duplicate connection lines
@@ -779,18 +812,24 @@ const MapComponent: React.FC<MapProps> = ({
       let weight = 1;
 
       if (isActive) {
-        fillColor = isJapanMode ? "#e11d48" : isUsaMode ? "#2563eb" : isChinaMode ? "#f59e0b" : isWorldMode ? "#64748b" : "#f59e0b";
-        color = "#ffffff";
-        radius = 8;
-        weight = 2;
+        fillColor = isJapanMode ? "#e11d48" : isUsaMode ? "#2563eb" : isChinaMode ? "#f59e0b" : isVietnamMode ? "#dc2626" : isWorldMode ? "#64748b" : "#f59e0b";
+        color = isVietnamMode ? "#facc15" : "#ffffff";
+        radius = isVietnamMode ? 8.5 : 8;
+        weight = isVietnamMode ? 3 : 2;
       } else if (isVisited) {
-        fillColor = isJapanMode ? "#f43f5e" : isUsaMode ? "#3b82f6" : isChinaMode ? "#eab308" : isWorldMode ? "#64748b" : "#10b981";
-        color = isJapanMode ? "rgba(244, 63, 94, 0.4)" : isUsaMode ? "rgba(59, 130, 246, 0.4)" : isChinaMode ? "rgba(234, 179, 8, 0.4)" : isWorldMode ? "rgba(100, 116, 139, 0.4)" : "rgba(16, 185, 129, 0.4)";
-        radius = 5.5;
+        fillColor = isVietnamMode ? "#facc15" : isJapanMode ? "#f43f5e" : isUsaMode ? "#3b82f6" : isChinaMode ? "#eab308" : isWorldMode ? "#64748b" : "#10b981";
+        color = isVietnamMode ? "#dc2626" : isJapanMode ? "rgba(244, 63, 94, 0.4)" : isUsaMode ? "rgba(59, 130, 246, 0.4)" : isChinaMode ? "rgba(234, 179, 8, 0.4)" : isWorldMode ? "rgba(100, 116, 139, 0.4)" : "rgba(16, 185, 129, 0.4)";
+        radius = isVietnamMode ? 7.5 : 5.5;
+        weight = isVietnamMode ? 2.5 : 1;
       } else if (isNext) {
-        fillColor = isChinaMode ? "#f59e0b" : "#3b82f6";
-        color = isChinaMode ? "rgba(245, 158, 11, 0.6)" : "rgba(59, 130, 246, 0.5)";
+        fillColor = isVietnamMode ? "#ef4444" : isChinaMode ? "#f59e0b" : "#3b82f6";
+        color = isVietnamMode ? "#facc15" : isChinaMode ? "rgba(245, 158, 11, 0.6)" : "rgba(59, 130, 246, 0.5)";
         radius = 6;
+        weight = 1.5;
+      } else if (isVietnamMode) {
+        fillColor = "rgba(15, 23, 42, 0.85)";
+        color = "#dc2626";
+        radius = 5;
         weight = 1.5;
       } else if (isChinaMode) {
         fillColor = "#d97706";
@@ -1002,13 +1041,15 @@ const MapComponent: React.FC<MapProps> = ({
       const isChina = activeRegion.level === "china";
       const isUsa = activeRegion.level === "usa";
       const isJapan = activeRegion.level === "japan";
-      const targetZoom = isWorld ? 3 : isChina ? 5 : isUsa ? 5 : isJapan ? 6 : 8;
+      const isVietnam = activeRegion.level === "vietnam";
+      const targetZoom = isWorld ? 3 : isChina ? 5 : isUsa ? 5 : isVietnam ? 5 : isJapan ? 6 : 8;
       mapRef.current?.setView([activeRegion.lat, activeRegion.lng], targetZoom);
     } else {
       const currentLevel = regionLevel || (regions && regions[0]?.level);
       if (currentLevel === "china") mapRef.current?.setView([35.0, 104.0], 4);
       else if (currentLevel === "usa") mapRef.current?.setView([37.0, -95.7], 4);
       else if (currentLevel === "japan") mapRef.current?.setView([36.2, 138.2], 6);
+      else if (currentLevel === "vietnam") mapRef.current?.setView([15.8, 107.5], 5);
       else if (currentLevel === "world") mapRef.current?.setView([20, 10], 3);
       else mapRef.current?.setView([36.2, 127.8], 8);
     }

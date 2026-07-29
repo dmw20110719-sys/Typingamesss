@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Trophy, Medal, X, RefreshCw, Crown, Zap, Clock, Target } from "lucide-react";
 import { fetchLeaderboard, RankingRecord } from "../lib/supabase";
 
-type LeaderboardMode = "sido" | "sigungu" | "japan" | "usa" | "china" | "world";
+type LeaderboardMode = "sido" | "sigungu" | "japan" | "usa" | "china" | "vietnam" | "world";
 
 interface LeaderboardModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const VALID_MODES: LeaderboardMode[] = ["sido", "sigungu", "japan", "usa", "china", "world"];
+      const VALID_MODES: LeaderboardMode[] = ["sido", "sigungu", "japan", "usa", "china", "vietnam", "world"];
       const modeToLoad: LeaderboardMode = VALID_MODES.includes(defaultMode as any)
         ? (defaultMode as LeaderboardMode)
         : "sido";
@@ -76,6 +76,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             {[
               { id: "sido", label: "🇰🇷 한국 광역" },
               { id: "sigungu", label: "🇰🇷 시·군·구" },
+              { id: "vietnam", label: "🇻🇳 베트남" },
               { id: "japan", label: "🇯🇵 일본" },
               { id: "usa", label: "🇺🇸 미국" },
               { id: "china", label: "🇨🇳 중국" },
@@ -86,7 +87,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 onClick={() => handleTabChange(tab.id as LeaderboardMode)}
                 className={`py-2 px-3.5 rounded-xl text-xs font-extrabold transition-all whitespace-nowrap cursor-pointer shadow-sm ${
                   activeTab === tab.id
-                    ? tab.id === "japan"
+                    ? tab.id === "vietnam"
+                      ? "bg-red-600 text-yellow-300 font-black shadow-red-600/20"
+                      : tab.id === "japan"
                       ? "bg-rose-600 text-white"
                       : tab.id === "usa"
                       ? "bg-blue-600 text-white"

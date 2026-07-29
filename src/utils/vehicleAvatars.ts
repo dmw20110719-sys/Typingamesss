@@ -74,6 +74,20 @@ export function getVehicleColorScheme(regionLevel?: string): VehicleColorScheme 
       tailwindRipple: "bg-amber-500/30",
     };
   }
+  if (regionLevel === "vietnam") {
+    return {
+      primary: "#dc2626",
+      dark: "#991b1b",
+      light: "#fee2e2",
+      glass: "#ef4444",
+      eye: "#fef08a",
+      tailwindBorder: "border-red-500",
+      tailwindBg: "bg-red-50 dark:bg-red-950/40",
+      tailwindText: "text-red-600 dark:text-red-400",
+      tailwindPill: "bg-red-600 text-yellow-300 font-black",
+      tailwindRipple: "bg-red-500/30",
+    };
+  }
   if (regionLevel === "world") {
     return {
       primary: "#64748b",

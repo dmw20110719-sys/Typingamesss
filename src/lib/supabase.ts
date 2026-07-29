@@ -8,7 +8,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 export interface RankingRecord {
   id?: string;
   nickname: string;
-  mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "world";
+  mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "vietnam" | "world";
   cpm: number;
   accuracy: number;
   time_seconds: number;
@@ -50,7 +50,7 @@ export const getBestRecordsPerNickname = (records: RankingRecord[]): RankingReco
   return sorted;
 };
 
-export const fetchLeaderboard = async (mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "world", limit = 50): Promise<RankingRecord[]> => {
+export const fetchLeaderboard = async (mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "vietnam" | "world", limit = 50): Promise<RankingRecord[]> => {
   const localRecords = getLocalLeaderboard(mode);
   let cloudRecords: RankingRecord[] = [];
 
@@ -177,7 +177,7 @@ export const submitScoreToLeaderboard = async (record: Omit<RankingRecord, "id" 
 // Local storage fallback handlers
 const LOCAL_LEADERBOARD_KEY = "typing_train_rankings_v1";
 
-const getLocalLeaderboard = (mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "world"): RankingRecord[] => {
+const getLocalLeaderboard = (mode: "sido" | "sigungu" | "japan" | "usa" | "china" | "vietnam" | "world"): RankingRecord[] => {
   try {
     const stored = localStorage.getItem(LOCAL_LEADERBOARD_KEY);
     if (!stored) return [];

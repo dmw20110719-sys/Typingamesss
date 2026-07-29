@@ -8,9 +8,10 @@ import { WORLD_COUNTRIES } from "./worldCountries";
 import { JAPAN_LIST } from "./japanRegions";
 import { USA_LIST } from "./usaRegions";
 import { CHINA_LIST } from "./chinaRegions";
+import { VIETNAM_LIST } from "./vietnamRegions";
 
 export const WORLD_LIST = WORLD_COUNTRIES;
-export { JAPAN_LIST, USA_LIST, CHINA_LIST };
+export { JAPAN_LIST, USA_LIST, CHINA_LIST, VIETNAM_LIST };
 
 export const REGIONS: Region[] = [
   // ==========================================
@@ -462,7 +463,7 @@ export const REGIONS: Region[] = [
 ];
 
 // Combine all regions
-export const ALL_REGIONS = [...REGIONS, ...WORLD_COUNTRIES, ...JAPAN_LIST, ...USA_LIST, ...CHINA_LIST];
+export const ALL_REGIONS = [...REGIONS, ...WORLD_COUNTRIES, ...JAPAN_LIST, ...USA_LIST, ...CHINA_LIST, ...VIETNAM_LIST];
 
 // Grouping helpers
 export const SIDO_LIST = REGIONS.filter((r) => r.level === "sido");

@@ -11,10 +11,11 @@ interface MapExplorerModalProps {
   japanList?: Region[];
   usaList?: Region[];
   chinaList?: Region[];
+  vietnamList?: Region[];
   worldList: Region[];
 }
 
-type ExplorerLevel = "sido" | "sigungu" | "japan" | "usa" | "china" | "world";
+type ExplorerLevel = "sido" | "sigungu" | "japan" | "usa" | "china" | "vietnam" | "world";
 
 export const MapExplorerModal: React.FC<MapExplorerModalProps> = ({
   isOpen,
@@ -24,6 +25,7 @@ export const MapExplorerModal: React.FC<MapExplorerModalProps> = ({
   japanList = [],
   usaList = [],
   chinaList = [],
+  vietnamList = [],
   worldList,
 }) => {
   const [level, setLevel] = useState<ExplorerLevel>("sido");
@@ -36,8 +38,9 @@ export const MapExplorerModal: React.FC<MapExplorerModalProps> = ({
     if (level === "japan") return japanList;
     if (level === "usa") return usaList;
     if (level === "china") return chinaList;
+    if (level === "vietnam") return vietnamList;
     return worldList;
-  }, [level, sidoList, sigunguList, japanList, usaList, chinaList, worldList]);
+  }, [level, sidoList, sigunguList, japanList, usaList, chinaList, vietnamList, worldList]);
 
   const filteredRegions = useMemo(() => {
     if (!searchTerm.trim()) return currentList;
@@ -62,7 +65,7 @@ export const MapExplorerModal: React.FC<MapExplorerModalProps> = ({
               <Compass className="w-5 h-5 animate-spin" style={{ animationDuration: "12s" }} />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-white">지도 탐색기 (한국 · 일본 · 미국 · 전세계)</h3>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">지도 탐색기 (한국 · 베트남 · 일본 · 미국 · 중국 · 전세계)</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">지도의 지역/국가 이름을 확인하고 위치를 살펴보세요</p>
             </div>
           </div>
@@ -147,6 +150,20 @@ export const MapExplorerModal: React.FC<MapExplorerModalProps> = ({
               }`}
             >
               <span>🇨🇳 중국 ({chinaList.length})</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setLevel("vietnam");
+                setSelectedRegion(null);
+              }}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                level === "vietnam"
+                  ? "bg-red-600 text-yellow-300 font-black shadow-sm"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <span>🇻🇳 베트남 ({vietnamList.length})</span>
             </button>
 
             <button

@@ -19,6 +19,8 @@ interface SettingsModalProps {
   onUpdateVehicleType?: (vehicle: VehicleType) => void;
   startButtonStyle?: "ticket" | "simple";
   onUpdateStartButtonStyle?: (style: "ticket" | "simple") => void;
+  ticketTearMode?: "auto" | "manual";
+  onUpdateTicketTearMode?: (mode: "auto" | "manual") => void;
   regionLevel?: string;
 }
 
@@ -31,6 +33,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateVehicleType,
   startButtonStyle = "ticket",
   onUpdateStartButtonStyle,
+  ticketTearMode = "auto",
+  onUpdateTicketTearMode,
   regionLevel,
 }) => {
   const [volume, setVolumeState] = useState<number>(0.5);
@@ -43,10 +47,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const isJapan = regionLevel === "japan";
   const isUsa = regionLevel === "usa";
   const isChina = regionLevel === "china";
+  const isVietnam = regionLevel === "vietnam";
   const isWorld = regionLevel === "world";
 
   const themePrimaryBg = isChina
     ? "bg-amber-500 hover:bg-amber-600 text-slate-950 font-black shadow-amber-500/20"
+    : isVietnam
+    ? "bg-red-600 hover:bg-red-500 text-yellow-300 font-black shadow-red-500/20"
     : isJapan
     ? "bg-rose-600 hover:bg-rose-500 text-white"
     : isUsa
@@ -57,6 +64,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const themePrimaryBorder = isChina
     ? "border-amber-500"
+    : isVietnam
+    ? "border-red-600"
     : isJapan
     ? "border-rose-600"
     : isUsa
@@ -67,6 +76,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const themePrimaryText = isChina
     ? "text-amber-500 dark:text-amber-400 font-extrabold"
+    : isVietnam
+    ? "text-red-600 dark:text-red-400 font-extrabold"
     : isJapan
     ? "text-rose-600 dark:text-rose-400"
     : isUsa
@@ -77,6 +88,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const themeIconBg = isChina
     ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800"
+    : isVietnam
+    ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-300 dark:border-red-800"
     : isJapan
     ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800"
     : isUsa
@@ -87,6 +100,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const themeAccentClass = isChina
     ? "accent-amber-500"
+    : isVietnam
+    ? "accent-red-600"
     : isJapan
     ? "accent-rose-600"
     : isUsa
@@ -231,6 +246,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {startButtonStyle === "simple" && <Check className="w-3.5 h-3.5 shrink-0" />}
               </button>
             </div>
+
+            {/* Sub-option for Ticket Tearing Mode */}
+            {startButtonStyle === "ticket" && (
+              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">티켓 뜯는 방식 (Tear Control)</span>
+                  <span className="text-[10px] text-slate-400 font-medium">자동 클릭 vs 터치/드래그</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onUpdateTicketTearMode?.("auto")}
+                    className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      ticketTearMode === "auto"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>⚡ 클릭 시 자동 뜯기</span>
+                    {ticketTearMode === "auto" && <Check className="w-3 h-3 shrink-0" />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onUpdateTicketTearMode?.("manual")}
+                    className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      ticketTearMode === "manual"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>🖐️ 직접 터치/드래그</span>
+                    {ticketTearMode === "manual" && <Check className="w-3 h-3 shrink-0" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-medium">
+                  {ticketTearMode === "auto"
+                    ? "✨ 클릭 한 번으로 탑승권이 실감나게 자동으로 뜯어집니다."
+                    : "🖐️ 탑승권 오른쪽 [출발] 영역을 손가락이나 마우스로 직접 아래로 잡고 찢습니다!"}
+                </p>
+              </div>
+            )}
+
             <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-medium">
               {startButtonStyle === "ticket"
                 ? "✈️ 실제 여행 탑승권 스타일로 우측 검정 티켓을 뜯어 출발합니다."

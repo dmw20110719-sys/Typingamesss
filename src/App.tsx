@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { ResultCardExport } from "./components/ResultCardExport";
-import { REGIONS, SIDO_LIST, SIGUNGU_LIST, WORLD_LIST, JAPAN_LIST, USA_LIST, CHINA_LIST, ALL_REGIONS } from "./data/regions";
+import { REGIONS, SIDO_LIST, SIGUNGU_LIST, WORLD_LIST, JAPAN_LIST, USA_LIST, CHINA_LIST, VIETNAM_LIST, ALL_REGIONS } from "./data/regions";
 import { Region, GameSettings, PlayStats, QuizQuestion, PlayMode } from "./types";
 import { Map } from "./components/Map";
 import { StatsPanel } from "./components/StatsPanel";
@@ -57,6 +57,7 @@ import southKoreaOnlyMap from "./assets/images/south_korea_only_map_178493846732
 import japanMapBg from "./assets/images/japan_red_map_1784975261763.jpg";
 import usaMapBg from "./assets/images/usa_soft_blue_map_1784975610776.jpg";
 import chinaMapBg from "./assets/images/china_clean_map_bg_1785149923067.jpg";
+import vietnamMapBg from "./assets/images/vietnam_red_map_bg_1785288357160.jpg";
 import cleanWorldMapBg from "./assets/images/world_pure_gray_map_1784975622332.jpg";
 import { submitScoreToLeaderboard } from "./lib/supabase";
 import { playSuccessSound, playCompleteSound, initAudio } from "./utils/audio";
@@ -89,9 +90,20 @@ export default function App() {
     localStorage.setItem("typetrip_start_button_style", style);
   };
 
+  // Ticket Tear Mode state ("auto" | "manual")
+  const [ticketTearMode, setTicketTearMode] = useState<"auto" | "manual">(() => {
+    const saved = localStorage.getItem("typetrip_ticket_tear_mode") as "auto" | "manual";
+    return saved === "manual" ? "manual" : "auto";
+  });
+
+  const handleUpdateTicketTearMode = (mode: "auto" | "manual") => {
+    setTicketTearMode(mode);
+    localStorage.setItem("typetrip_ticket_tear_mode", mode);
+  };
+
   // Screenshot Theme / Tab / Scope states
   const [homeTab, setHomeTab] = useState<"single" | "multiplayer">("single");
-  const [homeScope, setHomeScope] = useState<"korea" | "japan" | "usa" | "china" | "world">("korea");
+  const [homeScope, setHomeScope] = useState<"korea" | "japan" | "usa" | "china" | "vietnam" | "world">("korea");
   const [travelWay, setTravelWay] = useState<"typing" | "quiz">("typing");
   const [quizType, setQuizType] = useState<"country" | "capital">("country");
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
@@ -244,6 +256,8 @@ export default function App() {
         ? USA_LIST
         : settings.level === "china"
         ? CHINA_LIST
+        : settings.level === "vietnam"
+        ? VIETNAM_LIST
         : WORLD_LIST;
     const filtered =
       settings.regionGroup === "전체"
@@ -265,6 +279,8 @@ export default function App() {
         ? USA_LIST
         : settings.level === "china"
         ? CHINA_LIST
+        : settings.level === "vietnam"
+        ? VIETNAM_LIST
         : WORLD_LIST
     );
     return list.map((r) => (
@@ -785,8 +801,20 @@ export default function App() {
     try {
       // Simple custom client summary fallback
       const names = pathList.map((r) => r.name_kr).join(" ➔ ");
+      const countryTitle =
+        settings.level === "japan"
+          ? "일본"
+          : settings.level === "usa"
+          ? "미국"
+          : settings.level === "china"
+          ? "중국"
+          : settings.level === "vietnam"
+          ? "베트남"
+          : settings.level === "world"
+          ? "세계 각국"
+          : "대한민국 국토";
       setEndTravelSummary(
-        `기차 열차를 운행하여 ${pathList[0].name_kr}을 출발해 총 ${pathList.length}개 정거장(${names})을 통과하며 대한민국 국토를 대정복했습니다! 운항 도중 평균 속도 ${stats.cpm} CPM의 고속 주행을 유지하며 명예 Conducting 기사 1급 인증 마크를 수여받기에 완벽한 기록을 수립하셨습니다.`
+        `기차 열차를 운행하여 ${pathList[0].name_kr}을 출발해 총 ${pathList.length}개 정거장(${names})을 통과하며 ${countryTitle}를 대정복했습니다! 운항 도중 평균 속도 ${stats.cpm} CPM의 고속 주행을 유지하며 명예 Conducting 기사 1급 인증 마크를 수여받기에 완벽한 기록을 수립하셨습니다.`
       );
     } catch (err) {
       console.error(err);
@@ -816,6 +844,8 @@ export default function App() {
           ? USA_LIST
           : settings.level === "china"
           ? CHINA_LIST
+          : settings.level === "vietnam"
+          ? VIETNAM_LIST
           : WORLD_LIST;
       
       // Select 5 unique random regions
@@ -888,6 +918,10 @@ export default function App() {
           ? "bg-rose-50/50 dark:bg-slate-950"
           : homeScope === "usa"
           ? "bg-blue-50/40 dark:bg-slate-950"
+          : homeScope === "china"
+          ? "bg-amber-50/50 dark:bg-slate-950"
+          : homeScope === "vietnam"
+          ? "bg-red-50/50 dark:bg-slate-950"
           : homeScope === "world"
           ? "bg-slate-100 dark:bg-slate-950"
           : "bg-[#dceee9]/70 dark:bg-slate-950"
@@ -906,6 +940,8 @@ export default function App() {
                 ? usaMapBg
                 : homeScope === "china"
                 ? chinaMapBg
+                : homeScope === "vietnam"
+                ? vietnamMapBg
                 : cleanWorldMapBg
             }
             alt="Background Map"
@@ -918,6 +954,8 @@ export default function App() {
                 ? "scale-105 opacity-40 dark:opacity-25 filter brightness-105 contrast-90 blur-[2.5px]"
                 : homeScope === "china"
                 ? "scale-105 opacity-50 dark:opacity-35 filter brightness-105 contrast-90 blur-[2.5px]"
+                : homeScope === "vietnam"
+                ? "scale-105 opacity-50 dark:opacity-35 filter brightness-105 contrast-90 blur-[2.5px]"
                 : "scale-105 opacity-45 dark:opacity-30 filter grayscale contrast-90 blur-[2.5px]"
             }`}
           />
@@ -929,6 +967,8 @@ export default function App() {
               ? "bg-blue-50/65 dark:bg-slate-950/75"
               : homeScope === "china"
               ? "bg-amber-50/65 dark:bg-slate-950/75"
+              : homeScope === "vietnam"
+              ? "bg-red-50/65 dark:bg-slate-950/75"
               : homeScope === "world"
               ? "bg-slate-100/65 dark:bg-slate-950/75"
               : "bg-[#dceee9]/65 dark:bg-slate-950/75"
@@ -975,6 +1015,7 @@ export default function App() {
                 { id: "japan", label: "일본", activeColor: "bg-rose-600 text-white" },
                 { id: "usa", label: "미국", activeColor: "bg-blue-600 text-white" },
                 { id: "china", label: "중국", activeColor: "bg-amber-500 text-slate-950 font-black" },
+                { id: "vietnam", label: "베트남", activeColor: "bg-red-600 text-yellow-300 font-black" },
                 { id: "world", label: "전세계", activeColor: "bg-slate-700 dark:bg-slate-600 text-white" },
               ].map((item) => (
                 <button
@@ -986,6 +1027,7 @@ export default function App() {
                     else if (item.id === "japan") setSettings(p => ({ ...p, level: "japan", regionGroup: "전체" }));
                     else if (item.id === "usa") setSettings(p => ({ ...p, level: "usa", regionGroup: "전체" }));
                     else if (item.id === "china") setSettings(p => ({ ...p, level: "china", regionGroup: "전체" }));
+                    else if (item.id === "vietnam") setSettings(p => ({ ...p, level: "vietnam", regionGroup: "전체" }));
                     else setSettings(p => ({ ...p, level: "world", regionGroup: "전체" }));
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center whitespace-nowrap cursor-pointer ${
@@ -1062,6 +1104,8 @@ export default function App() {
                     ? "text-blue-600 dark:text-blue-400"
                     : homeScope === "china"
                     ? "text-amber-500 dark:text-amber-400"
+                    : homeScope === "vietnam"
+                    ? "text-red-600 dark:text-red-400"
                     : "text-slate-500 dark:text-slate-400"
                 }`}>
                   {homeScope === "korea"
@@ -1072,6 +1116,8 @@ export default function App() {
                     ? "미국을 여행해요."
                     : homeScope === "china"
                     ? "중국을 여행해요."
+                    : homeScope === "vietnam"
+                    ? "베트남을 여행해요."
                     : "전세계를 여행해요."}
                 </span>
               </h2>
@@ -1122,6 +1168,8 @@ export default function App() {
                         ? "bg-blue-600 text-white shadow-sm"
                         : homeScope === "china"
                         ? "bg-amber-500 text-slate-950 font-black shadow-sm"
+                        : homeScope === "vietnam"
+                        ? "bg-red-600 text-yellow-300 font-black shadow-sm"
                         : homeScope === "world"
                         ? "bg-slate-800 dark:bg-slate-700 text-white shadow-sm"
                         : "bg-emerald-600 text-white shadow-sm"
@@ -1146,6 +1194,8 @@ export default function App() {
                         ? "text-blue-600 dark:text-blue-400"
                         : homeScope === "china"
                         ? "text-amber-600 dark:text-amber-400"
+                        : homeScope === "vietnam"
+                        ? "text-red-600 dark:text-red-400"
                         : "text-slate-500 dark:text-slate-400"
                     }`}>
                       여행 설정 ({
@@ -1157,6 +1207,8 @@ export default function App() {
                           ? "미국"
                           : homeScope === "china"
                           ? "중국"
+                          : homeScope === "vietnam"
+                          ? "베트남"
                           : "전세계"
                       })
                     </span>
@@ -1217,7 +1269,11 @@ export default function App() {
                         }}
                         className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                           travelWay === "quiz"
-                            ? homeScope === "japan" || settings.level === "japan"
+                            ? homeScope === "china" || settings.level === "china"
+                              ? "bg-amber-500 text-slate-950 shadow-sm font-black"
+                              : homeScope === "vietnam" || settings.level === "vietnam"
+                              ? "bg-red-600 text-yellow-300 shadow-sm font-black"
+                              : homeScope === "japan" || settings.level === "japan"
                               ? "bg-rose-600 text-white shadow-sm font-black"
                               : homeScope === "usa" || settings.level === "usa"
                               ? "bg-blue-600 text-white shadow-sm font-black"
@@ -1413,6 +1469,44 @@ export default function App() {
                         </div>
                       </div>
                     </div>
+                  ) : homeScope === "vietnam" ? (
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-bold text-red-600 dark:text-red-400 block">베트남 63개 성·직할시 ({VIETNAM_LIST.length}개 주요 도시·성)</span>
+                      
+                      <div className="pt-0.5">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block">권역 필터</span>
+                          {isRankingChallenge && travelWay !== "quiz" && (
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">🏆 랭킹 도전 시 '전체' 고정</span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {["전체", "북부", "중부", "남부", "직할시"].map((grp) => {
+                            const isLocked = isRankingChallenge && travelWay !== "quiz" && grp !== "전체";
+                            return (
+                              <button
+                                key={grp}
+                                type="button"
+                                disabled={isLocked}
+                                onClick={() => {
+                                  if (isLocked) return;
+                                  setSettings(p => ({ ...p, level: "vietnam", regionGroup: grp }));
+                                }}
+                                className={`px-2.5 py-1 text-[10px] font-bold rounded-lg border transition-all ${
+                                  isLocked
+                                    ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-200 dark:border-slate-800 opacity-50 cursor-not-allowed"
+                                    : settings.regionGroup === grp
+                                    ? "bg-red-600 text-yellow-300 border-red-600 font-extrabold shadow-sm cursor-pointer"
+                                    : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                                }`}
+                              >
+                                {grp}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -1479,6 +1573,8 @@ export default function App() {
                               settings.targetCount === cnt
                                 ? homeScope === "china" || settings.level === "china"
                                   ? "bg-amber-500 text-slate-950 shadow-sm font-black"
+                                  : homeScope === "vietnam" || settings.level === "vietnam"
+                                  ? "bg-red-600 text-yellow-300 shadow-sm font-black"
                                   : homeScope === "world" || settings.level === "world"
                                   ? "bg-slate-700 text-white shadow-sm font-black"
                                   : homeScope === "japan" || settings.level === "japan"
@@ -1571,6 +1667,7 @@ export default function App() {
                         isRankingChallenge={isRankingChallenge}
                         nickname={nickname}
                         targetCount={settings.targetCount || 10}
+                        ticketTearMode={ticketTearMode}
                         onStart={() => {
                           if (isRankingChallenge && travelWay !== "quiz") {
                             setNicknameError(false);
@@ -1632,6 +1729,8 @@ export default function App() {
                               ? "bg-blue-600 hover:bg-blue-500 text-white"
                               : homeScope === "china" || settings.level === "china"
                               ? "bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-500/20"
+                              : homeScope === "vietnam" || settings.level === "vietnam"
+                              ? "bg-red-600 hover:bg-red-500 text-yellow-300 font-black shadow-red-500/20"
                               : homeScope === "world" || settings.level === "world"
                               ? "bg-slate-600 hover:bg-slate-500 text-white"
                               : "bg-emerald-600 hover:bg-emerald-500 text-white"
@@ -1664,6 +1763,7 @@ export default function App() {
                     japan: JAPAN_LIST,
                     usa: USA_LIST,
                     china: CHINA_LIST,
+                    vietnam: VIETNAM_LIST,
                     world: WORLD_LIST,
                   }}
                   onStartMultiplayerGame={(room, initialRoomState) => {
@@ -1728,6 +1828,8 @@ export default function App() {
                 className={`w-5 h-5 animate-spin ${
                   settings.level === "china"
                     ? "text-amber-500"
+                    : settings.level === "vietnam"
+                    ? "text-red-600 dark:text-red-400"
                     : settings.level === "world"
                     ? "text-slate-600 dark:text-slate-400"
                     : settings.level === "japan"
@@ -1743,6 +1845,8 @@ export default function App() {
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border ${
                   settings.level === "china"
                     ? "bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300"
+                    : settings.level === "vietnam"
+                    ? "bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300"
                     : settings.level === "world"
                     ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300"
                     : settings.level === "japan"
@@ -1770,6 +1874,8 @@ export default function App() {
                   className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 shadow-sm ${
                     settings.level === "china"
                       ? "focus:ring-amber-500/20 focus:border-amber-500"
+                      : settings.level === "vietnam"
+                      ? "focus:ring-red-500/20 focus:border-red-500"
                       : settings.level === "world"
                       ? "focus:ring-slate-500/20 focus:border-slate-500"
                       : settings.level === "japan"
@@ -1807,7 +1913,7 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Option 1: Level range (sido vs sigungu vs japan vs usa vs china vs world) */}
+              {/* Option 1: Level range (sido vs sigungu vs japan vs usa vs china vs vietnam vs world) */}
               <div>
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-2.5">
                   1. 행정구역 / 지리 범위 (Region Scope Mode)
@@ -1861,6 +1967,23 @@ export default function App() {
                     <span className="text-xs font-bold">🇨🇳 중국 34개 성급 행정구</span>
                     <span className={`text-[10px] ${settings.level === "china" ? "text-slate-900 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                       성·직할시·자치구·특별행정구
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSettings((prev) => ({ ...prev, level: "vietnam", regionGroup: "전체" }));
+                      setHomeScope("vietnam");
+                    }}
+                    className={`p-3 rounded-2xl text-center border transition-all duration-300 flex flex-col gap-1 items-center justify-center cursor-pointer ${
+                      settings.level === "vietnam"
+                        ? "bg-red-600 border-red-600 text-yellow-300 font-black shadow-md"
+                        : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    <span className="text-xs font-bold">🇻🇳 베트남 63개 성·직할시</span>
+                    <span className={`text-[10px] ${settings.level === "vietnam" ? "text-yellow-200 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
+                      하노이, 호치민, 다낭 등
                     </span>
                   </button>
 
@@ -1927,6 +2050,8 @@ export default function App() {
                     ? ["전체", "아시아", "유럽", "아메리카", "아프리카", "오세아니아"]
                     : settings.level === "china"
                     ? ["전체", "화북", "동북", "화동", "중남", "서남", "서북", "직할시", "특별행정구"]
+                    : settings.level === "vietnam"
+                    ? ["전체", "북부", "중부", "남부", "직할시"]
                     : settings.level === "japan"
                     ? ["전체", "홋카이도/도호쿠", "간토", "주부", "간사이", "주고쿠/시코쿠", "큐슈/오키나와"]
                     : settings.level === "usa"
@@ -1940,6 +2065,8 @@ export default function App() {
                         settings.regionGroup === group
                           ? settings.level === "china"
                             ? "bg-amber-500 border-amber-500 text-slate-950 font-black shadow-sm"
+                            : settings.level === "vietnam"
+                            ? "bg-red-600 border-red-600 text-yellow-300 font-black shadow-sm"
                             : settings.level === "world"
                             ? "bg-slate-700 border-slate-700 text-white font-extrabold shadow-sm"
                             : settings.level === "japan"
@@ -1978,6 +2105,8 @@ export default function App() {
                           settings.targetCount === num
                             ? settings.level === "china"
                               ? "bg-amber-500 text-slate-950 font-black border-amber-500 shadow-sm"
+                              : settings.level === "vietnam"
+                              ? "bg-red-600 text-yellow-300 font-black border-red-600 shadow-sm"
                               : settings.level === "world"
                               ? "bg-slate-700 text-white font-extrabold border-slate-700 shadow-sm"
                               : settings.level === "japan"
@@ -2022,6 +2151,8 @@ export default function App() {
                       className={`w-16 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-1 text-xs font-black text-center text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 ${
                         settings.level === "china"
                           ? "focus:ring-amber-500/30 focus:border-amber-500"
+                          : settings.level === "vietnam"
+                          ? "focus:ring-red-500/30 focus:border-red-500"
                           : settings.level === "world"
                           ? "focus:ring-slate-500/30 focus:border-slate-500"
                           : settings.level === "japan"
@@ -2050,6 +2181,8 @@ export default function App() {
                   className={`w-4 h-4 rounded cursor-pointer border border-slate-300 dark:border-slate-600 ${
                     settings.level === "china"
                       ? "accent-amber-500"
+                      : settings.level === "vietnam"
+                      ? "accent-red-600"
                       : settings.level === "world"
                       ? "accent-slate-700"
                       : settings.level === "japan"
@@ -2067,6 +2200,8 @@ export default function App() {
                 className={`w-full py-4 font-black tracking-widest text-center rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer ${
                   settings.level === "china"
                     ? "bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/20"
+                    : settings.level === "vietnam"
+                    ? "bg-red-600 hover:bg-red-500 text-yellow-300 shadow-red-600/20"
                     : settings.level === "world"
                     ? "bg-slate-800 hover:bg-slate-700 text-white shadow-slate-800/20"
                     : settings.level === "japan"
@@ -2076,7 +2211,7 @@ export default function App() {
                     : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20"
                 }`}
               >
-                <Train className={`w-5 h-5 ${settings.level === "china" ? "fill-slate-950" : "fill-white"}`} />
+                <Train className={`w-5 h-5 ${settings.level === "china" ? "fill-slate-950" : settings.level === "vietnam" ? "fill-yellow-300" : "fill-white"}`} />
                 <span>운행 시작하기 (DEPART TRAIN NOW)</span>
               </button>
             </div>
@@ -2090,6 +2225,7 @@ export default function App() {
           const isJapan = settings.level === "japan" || homeScope === "japan";
           const isUsa = settings.level === "usa" || homeScope === "usa";
           const isChina = settings.level === "china" || homeScope === "china";
+          const isVietnam = settings.level === "vietnam" || homeScope === "vietnam";
           const isWorld = settings.level === "world" || homeScope === "world";
 
           const countdownNumColor = isJapan
@@ -2098,6 +2234,8 @@ export default function App() {
             ? "text-blue-600 dark:text-blue-400"
             : isChina
             ? "text-amber-500 dark:text-amber-400 font-extrabold drop-shadow-[0_0_25px_rgba(245,158,11,0.5)]"
+            : isVietnam
+            ? "text-red-600 dark:text-red-400 font-extrabold drop-shadow-[0_0_25px_rgba(220,38,38,0.5)]"
             : isWorld
             ? "text-slate-800 dark:text-slate-100"
             : "text-emerald-600 dark:text-emerald-400";
@@ -2108,6 +2246,8 @@ export default function App() {
             ? "bg-blue-500/15"
             : isChina
             ? "bg-amber-500/25"
+            : isVietnam
+            ? "bg-red-500/25"
             : isWorld
             ? "bg-slate-500/10"
             : "bg-emerald-500/15";
@@ -2118,6 +2258,8 @@ export default function App() {
             ? "text-blue-600 dark:text-blue-400"
             : isChina
             ? "text-amber-600 dark:text-amber-400 font-black"
+            : isVietnam
+            ? "text-red-600 dark:text-red-400 font-black"
             : isWorld
             ? "text-slate-600 dark:text-slate-400"
             : "text-emerald-600 dark:text-emerald-400";
@@ -2130,7 +2272,7 @@ export default function App() {
               <span className={`text-xs font-bold tracking-[0.25em] uppercase mb-4 flex items-center gap-2 ${countdownBadgeColor}`}>
                 <Volume2 className={`w-4 h-4 animate-bounce ${countdownBadgeColor}`} />
                 <span>
-                  {isJapan ? "🇯🇵 일본 도도부현 주행 시작" : isUsa ? "🇺🇸 미국 50개 주 주행 시작" : isChina ? "🇨🇳 중국 34개 성급 행정구역 주행 시작" : isWorld ? "🌐 전세계 주요국 주행 시작" : "🚩 대한민국 행정구역 주행 시작"}
+                  {isJapan ? "🇯🇵 일본 도도부현 주행 시작" : isUsa ? "🇺🇸 미국 50개 주 주행 시작" : isChina ? "🇨🇳 중국 34개 성급 행정구역 주행 시작" : isVietnam ? "🇻🇳 베트남 34개 성·직할시 주행 시작" : isWorld ? "🌐 전세계 주요국 주행 시작" : "🚩 대한민국 행정구역 주행 시작"}
                 </span>
               </span>
 
@@ -2250,6 +2392,8 @@ export default function App() {
                         ? "bg-blue-600/95 border-blue-500 text-white"
                         : settings.level === "china" || homeScope === "china"
                         ? "bg-amber-500/95 border-amber-400 text-slate-950 font-black shadow-amber-500/20"
+                        : settings.level === "vietnam" || homeScope === "vietnam"
+                        ? "bg-red-600/95 border-red-500 text-yellow-300 font-black shadow-red-500/20"
                         : settings.level === "world" || homeScope === "world"
                         ? "bg-slate-700/95 border-slate-600 text-white"
                         : "bg-emerald-600/90 border-emerald-500 text-white"
@@ -2265,6 +2409,8 @@ export default function App() {
                         ? "🇺🇸 미국"
                         : settings.level === "china" || homeScope === "china"
                         ? "🇨🇳 중국"
+                        : settings.level === "vietnam" || homeScope === "vietnam"
+                        ? "🇻🇳 베트남"
                         : settings.level === "world" || homeScope === "world"
                         ? "🌐 전세계"
                         : "🚩 대한민국"}{" "}
@@ -2273,8 +2419,8 @@ export default function App() {
                         ? "도도부현"
                         : settings.level === "usa" || homeScope === "usa"
                         ? "주(State)"
-                        : settings.level === "china" || homeScope === "china"
-                        ? "성·행정구"
+                        : settings.level === "china" || homeScope === "china" || settings.level === "vietnam" || homeScope === "vietnam"
+                        ? "성·직할시"
                         : settings.level === "world" || homeScope === "world"
                         ? "국가"
                         : "구역"}{" "}
@@ -2386,6 +2532,10 @@ export default function App() {
                     ? "일본 47개 도도부현"
                     : settings.level === "usa"
                     ? "미국 50개 주"
+                    : settings.level === "china"
+                    ? "중국 34개 성·직할시"
+                    : settings.level === "vietnam"
+                    ? "베트남 34개 성·직할시"
                     : "세계 여행 코스"}
                 </h2>
 
@@ -2535,7 +2685,21 @@ export default function App() {
                   {/* Share Result Text */}
                   <button
                     onClick={() => {
-                      const text = `[MAP TYPING] ${settings.level === "sido" ? "대한민국 전체" : "타이핑 여행"} ${coursePath.length}곳 완주!\n타자 속도: ${stats.cpm}타/분, 정확도: ${Math.round(stats.accuracy * 100)}%\n여행시간: ${formatTravelTime(stats.elapsedTime)}`;
+                      const levelTitle =
+                        settings.level === "sido"
+                          ? "대한민국 전체"
+                          : settings.level === "sigungu"
+                          ? "대한민국 시·군·구"
+                          : settings.level === "japan"
+                          ? "일본 47개 도도부현"
+                          : settings.level === "usa"
+                          ? "미국 50개 주"
+                          : settings.level === "china"
+                          ? "중국 34개 성·직할시"
+                          : settings.level === "vietnam"
+                          ? "베트남 34개 성·직할시"
+                          : "세계 여행 코스";
+                      const text = `[MAP TYPING] ${levelTitle} ${coursePath.length}곳 완주!\n타자 속도: ${stats.cpm}타/분, 정확도: ${Math.round(stats.accuracy * 100)}%\n여행시간: ${formatTravelTime(stats.elapsedTime)}`;
                       navigator.clipboard.writeText(text);
                       setAlertText("📋 결과가 클립보드에 복사되었습니다!");
                       setIsAlertActive(true);
@@ -2674,6 +2838,8 @@ export default function App() {
         onUpdateVehicleType={handleUpdateVehicleType}
         startButtonStyle={startButtonStyle}
         onUpdateStartButtonStyle={handleUpdateStartButtonStyle}
+        ticketTearMode={ticketTearMode}
+        onUpdateTicketTearMode={handleUpdateTicketTearMode}
         regionLevel={settings.level || homeScope}
       />
 
@@ -2686,6 +2852,7 @@ export default function App() {
         japanList={JAPAN_LIST}
         usaList={USA_LIST}
         chinaList={CHINA_LIST}
+        vietnamList={VIETNAM_LIST}
         worldList={WORLD_LIST}
       />
 

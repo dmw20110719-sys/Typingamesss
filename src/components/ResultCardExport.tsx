@@ -32,7 +32,9 @@ export const ResultCardExport: React.FC<ResultCardExportProps> = ({
       : level === "usa"
       ? "미국 50개 주"
       : level === "china"
-      ? "중국 성급 행정구"
+      ? "중국 34개 성·직할시"
+      : level === "vietnam"
+      ? "베트남 34개 성·직할시"
       : "세계 여행 코스";
 
   const scopeLabel =
@@ -46,6 +48,8 @@ export const ResultCardExport: React.FC<ResultCardExportProps> = ({
       ? "미국 주"
       : level === "china"
       ? "중국 성"
+      : level === "vietnam"
+      ? "베트남 성·시"
       : "세계 국가";
 
   // Geographic projection calculation for coursePath

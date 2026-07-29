@@ -202,3 +202,23 @@ export function playTicketTearSound() {
     console.warn("Audio play failed:", e);
   }
 }
+
+export function playTicketPerforationTickSound() {
+  if (!soundEnabled || soundVolume <= 0) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(750 + Math.random() * 250, now);
+    gain.gain.setValueAtTime(0.05 * soundVolume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.025);
+  } catch (e) {
+    console.warn("Audio play failed:", e);
+  }
+}

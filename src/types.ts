@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type RegionLevel = "sido" | "sigungu" | "world" | "japan" | "usa" | "china";
+export type RegionLevel = "sido" | "sigungu" | "world" | "japan" | "usa" | "china" | "vietnam";
 
 export interface Region {
   id: string;
